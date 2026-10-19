@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Uncertainty.Core/Uncertainty.Core.csproj" />
+    <Project Path="src/Uncertainty.Web/Uncertainty.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Uncertainty.Core.Tests/Uncertainty.Core.Tests.csproj" />
+  </Folder>
+</Solution>

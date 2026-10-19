@@ -1,0 +1,71 @@
+[
+  {
+    "id": "G-01",
+    "source": "Прототип: мікрометр, 10 відліків",
+    "checks": "Тип A + два B, ν_eff, t-квантиль, округлення",
+    "status": "Перевірено",
+    "input": {
+      "kind": "direct",
+      "readings": [],
+      "typeB": [
+        { "name": "Δ", "halfWidth": 0.004 },
+        { "name": "d", "resolution": 0.01 }
+      ],
+      "coverage": { "mode": "student", "p": 0.95 },
+      "todo": "перенести 10 відліків і розподіли з прототипу"
+    },
+    "expected": { "nuEff": 26, "k": 2.056, "result": "(12,329 ± 0,012) мм" }
+  },
+  {
+    "id": "G-02",
+    "source": "Прототип: R = U / I",
+    "checks": "Непряме, лише тип B, k для ν = ∞",
+    "status": "Звірити з NIST",
+    "input": {
+      "kind": "indirect",
+      "model": "R = U / I",
+      "typeB": [
+        { "name": "U", "halfWidth": 0.075 },
+        { "name": "I", "halfWidth": 0.0375 }
+      ],
+      "todo": "перенести значення U, I і розподіли з прототипу"
+    },
+    "expected": { "k": 1.960, "result": "(5,020 ± 0,092) Ом" }
+  },
+  {
+    "id": "G-03",
+    "source": "Прототип: V = π·d²·h / 4",
+    "checks": "Нелінійна модель, змішані A і B",
+    "status": "Звірити з NIST",
+    "input": {
+      "kind": "indirect",
+      "model": "V = pi * d^2 * h / 4",
+      "todo": "перенести відліки d, h і характеристики приладів з прототипу"
+    },
+    "expected": { "nuEff": 32, "result": "(11049 ± 17) мм³" }
+  },
+  {
+    "id": "G-04",
+    "source": "Прототип: P = U² / R",
+    "checks": "Степінь у формулі, свідоцтво U/k",
+    "status": "Звірити з NIST",
+    "input": {
+      "kind": "indirect",
+      "model": "P = U^2 / R",
+      "todo": "перенести U, R і дані свідоцтва з прототипу"
+    },
+    "expected": { "result": "(20,00 ± 0,79) Вт" }
+  },
+  {
+    "id": "G-05",
+    "source": "Прототип: ρ = m / V",
+    "checks": "Відома u, грецька літера в імені",
+    "status": "Звірити з NIST",
+    "input": {
+      "kind": "indirect",
+      "model": "ρ = m / V",
+      "todo": "перенести m, V і їхні u з прототипу"
+    },
+    "expected": { "result": "(7,937 ± 0,051) г/см³" }
+  }
+]
