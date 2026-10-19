@@ -1,0 +1,76 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  REPO_NAME: ${{ github.event.repository.name }}
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - run: dotnet publish src/Uncertainty.Web -c Release -o out
+
+      - name: base href, 404.html, .nojekyll
+        run: |
+          sed -i "s|<base href=\"/\" />|<base href=\"/${REPO_NAME}/\" />|" out/wwwroot/index.html
+          grep -q "<base href=\"/${REPO_NAME}/\"" out/wwwroot/index.html
+          cp out/wwwroot/index.html out/wwwroot/404.html
+          touch out/wwwroot/.nojekyll
+
+      - name: Script Blazor exists under name index.html
+        run: |
+          html=out/wwwroot/index.html
+          echo "--- index.html, рядки з blazor.webassembly:"
+          grep -n 'blazor\.webassembly' "$html" || true
+          echo "--- _framework, файли blazor.webassembly*:"
+          ls out/wwwroot/_framework | grep 'blazor\.webassembly' || true
+          srcs=$(grep -oE '<script[^>]*src="[^"]*blazor\.webassembly[^"]*\.js"' "$html" \
+                 | grep -oE '_framework/[^"]+' || true)
+          if [ -z "$srcs" ]; then
+            echo "::error::У index.html немає <script src> зі скриптом Blazor"; exit 1
+          fi
+          for s in $srcs; do
+            if [ -f "out/wwwroot/$s" ]; then echo "OK: $s"
+            else echo "::error::index.html посилається на $s, а такого файлу немає"; exit 1; fi
+          done
+
+      - name: Size of _framework
+        run: du -sb out/wwwroot/_framework | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out/wwwroot
+          include-hidden-files: true
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
